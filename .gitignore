@@ -1,0 +1,30 @@
+# Python virtual environment
+.venv/
+python/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Terraform working directory
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files
+*.tfvars
+*.tfvars.json
+
+# Environment / secret files
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# VS Code local settings
+.vscode/
+
+.pytest_cache/
