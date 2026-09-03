@@ -103,7 +103,7 @@ data "aws_iam_policy_document" "github_actions_trust" {
       variable = "token.actions.githubusercontent.com:sub"
 
       values = [
-        "repo:IAMLEX1/aws-iam-access-governance-automation:ref:refs/heads/main"
+        "repo:IAMLEX1@226627867/aws-iam-access-governance-automation@1353881299:ref:refs/heads/main"
       ]
     }
   }
