@@ -60,3 +60,82 @@ resource "aws_ssoadmin_account_assignment" "admin_group" {
   target_id   = data.aws_caller_identity.current.account_id
   target_type = "AWS_ACCOUNT"
 }
+
+resource "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+
+  client_id_list = [
+    "sts.amazonaws.com"
+  ]
+
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1"
+  ]
+}
+
+data "aws_iam_policy_document" "github_actions_trust" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sts:AssumeRoleWithWebIdentity"
+    ]
+
+    principals {
+      type = "Federated"
+
+      identifiers = [
+        aws_iam_openid_connect_provider.github.arn
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+
+      values = [
+        "sts.amazonaws.com"
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+
+      values = [
+        "repo:IAMLEX1/aws-iam-access-governance-automation:ref:refs/heads/main"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "github_actions" {
+  name = "GitHubActions-IAM-Governance"
+
+  assume_role_policy = data.aws_iam_policy_document.github_actions_trust.json
+}
+
+data "aws_iam_policy_document" "github_actions_permissions" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sso:*",
+      "identitystore:*",
+      "iam:GetRole",
+      "iam:GetPolicy",
+      "iam:ListRoles",
+      "iam:ListPolicies",
+      "sts:GetCallerIdentity"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "github_actions_permissions" {
+  name = "GitHubActions-IAM-Governance-Permissions"
+  role = aws_iam_role.github_actions.id
+
+  policy = data.aws_iam_policy_document.github_actions_permissions.json
+}
