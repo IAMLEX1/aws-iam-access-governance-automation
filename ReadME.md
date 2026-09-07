@@ -964,6 +964,8 @@ Key evidence includes:
 - Generated access governance report
 - Final Terraform validation with no infrastructure drift
 - Automated pytest results with all access-logic tests passing
+- Successful GitHub Actions Terraform CI workflow
+- AWS OIDC federation and STS temporary credential authentication for Terraform CI
 
 The evidence demonstrates both successful execution and verification of the resulting state.
 
@@ -980,6 +982,50 @@ The evidence demonstrates both successful execution and verification of the resu
 | pytest | Automated unit testing |
 | Git | Source control |
 | GitHub | Portfolio repository and project documentation |
+| GitHub Actions | Automated Terraform CI pipeline |
+| OpenID Connect (OIDC) | Keyless GitHub-to-AWS authentication |
+| AWS STS | Temporary AWS credentials for GitHub Actions |
+
+## GitHub Actions CI with AWS OIDC Federation
+
+This project uses GitHub Actions to automatically validate the Terraform infrastructure whenever changes are pushed to the repository.
+
+GitHub Actions authenticates to AWS using OpenID Connect (OIDC) federation instead of storing long-lived AWS access keys in GitHub.
+
+### CI Authentication Flow
+
+GitHub Push  
+↓  
+GitHub Actions  
+↓  
+GitHub OIDC Token  
+↓  
+AWS OIDC Provider  
+↓  
+AWS STS  
+↓  
+GitHubActions-IAM-Governance Role  
+↓  
+Temporary AWS Credentials  
+↓  
+Terraform CI
+
+### Terraform CI Pipeline
+
+The workflow automatically performs:
+
+- Repository checkout
+- GitHub OIDC authentication
+- AWS role assumption using temporary credentials
+- AWS identity verification
+- `terraform fmt -check`
+- `terraform init`
+- `terraform validate`
+- `terraform plan`
+
+This provides automated infrastructure validation while avoiding long-lived AWS credentials in the GitHub repository.
+
+The workflow intentionally performs `terraform plan` rather than automatically running `terraform apply`, keeping infrastructure deployment as a controlled action.
 
 ## Future Enterprise Enhancement
 
